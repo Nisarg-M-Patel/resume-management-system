@@ -1,7 +1,7 @@
 // src/components/EntryForm.tsx
 
 import { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, FieldValues } from 'react-hook-form';
 import { Entry, EntryType, emptyEntry } from '../models/Entry';
 
 interface EntryFormProps {
@@ -22,33 +22,21 @@ export default function EntryForm({
   const [isPresent, setIsPresent] = useState(!initialData.endDate);
   
   // Bullet points field array
-  const { 
-    fields: bulletFields, 
-    append: appendBullet, 
-    remove: removeBullet 
-  } = useFieldArray({
+  const bulletFieldArray = useFieldArray({
     control,
-    name: "bullets"
+    name: "bullets" as const
   });
   
   // Keywords field array
-  const { 
-    fields: keywordFields, 
-    append: appendKeyword, 
-    remove: removeKeyword 
-  } = useFieldArray({
+  const keywordFieldArray = useFieldArray({
     control,
-    name: "keywords"
+    name: "keywords" as const
   });
   
   // URLs field array
-  const { 
-    fields: urlFields, 
-    append: appendUrl, 
-    remove: removeUrl 
-  } = useFieldArray({
+  const urlFieldArray = useFieldArray({
     control,
-    name: "urls"
+    name: "urls" as const
   });
   
   return (
@@ -176,7 +164,7 @@ export default function EntryForm({
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Achievement Bullet Points</h2>
         
-        {bulletFields.map((field, index) => (
+        {bulletFieldArray.fields.map((field, index) => (
           <div key={field.id} className="flex gap-2">
             <input
               {...register(`bullets.${index}` as const)}
@@ -185,7 +173,7 @@ export default function EntryForm({
             />
             <button
               type="button"
-              onClick={() => removeBullet(index)}
+              onClick={() => bulletFieldArray.remove(index)}
               className="bg-red-100 text-red-600 p-2 rounded"
             >
               Remove
@@ -195,7 +183,7 @@ export default function EntryForm({
         
         <button
           type="button"
-          onClick={() => appendBullet("")}
+          onClick={() => bulletFieldArray.append("")}
           className="bg-blue-50 text-blue-600 px-3 py-2 rounded"
         >
           + Add Bullet Point
@@ -210,7 +198,7 @@ export default function EntryForm({
         </p>
         
         <div className="flex flex-wrap gap-2 mb-2">
-          {keywordFields.map((field, index) => (
+          {keywordFieldArray.fields.map((field, index) => (
             <div key={field.id} className="flex bg-blue-50 rounded-full overflow-hidden">
               <input
                 {...register(`keywords.${index}` as const)}
@@ -219,7 +207,7 @@ export default function EntryForm({
               />
               <button
                 type="button"
-                onClick={() => removeKeyword(index)}
+                onClick={() => keywordFieldArray.remove(index)}
                 className="bg-blue-100 text-blue-700 px-2"
               >
                 ×
@@ -230,7 +218,7 @@ export default function EntryForm({
         
         <button
           type="button"
-          onClick={() => appendKeyword("")}
+          onClick={() => keywordFieldArray.append("")}
           className="bg-blue-50 text-blue-600 px-3 py-2 rounded"
         >
           + Add Keyword
@@ -241,7 +229,7 @@ export default function EntryForm({
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">URLs</h2>
         
-        {urlFields.map((field, index) => (
+        {urlFieldArray.fields.map((field, index) => (
           <div key={field.id} className="grid grid-cols-2 gap-2">
             <input
               {...register(`urls.${index}.title` as const)}
@@ -256,7 +244,7 @@ export default function EntryForm({
               />
               <button
                 type="button"
-                onClick={() => removeUrl(index)}
+                onClick={() => urlFieldArray.remove(index)}
                 className="bg-red-100 text-red-600 p-2 rounded"
               >
                 ×
@@ -267,7 +255,7 @@ export default function EntryForm({
         
         <button
           type="button"
-          onClick={() => appendUrl({ title: "", url: "" })}
+          onClick={() => urlFieldArray.append({ title: "", url: "" })}
           className="bg-blue-50 text-blue-600 px-3 py-2 rounded"
         >
           + Add URL
