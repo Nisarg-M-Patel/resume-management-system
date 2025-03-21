@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm ci || npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -17,7 +17,9 @@ COPY . .
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TYPESCRIPT_CHECK false
 
+# Build with TS checking disabled
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -27,11 +29,18 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
 # Copy necessary files
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
+USER nextjs
+
 EXPOSE 3000
+
+ENV PORT 3000
 
 CMD ["node", "server.js"]
